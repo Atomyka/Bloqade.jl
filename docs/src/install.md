@@ -42,9 +42,9 @@ Bloqade package, just add `#master` after the package name, e.g.:
 pkg> add BloqadeExpr#master
 ```
 
-## Using Bloqade with AWS EC2
+## Using Bloqade with Amazon EC2
 
-Bloqade can be deployed on any personal computer although some users might benefit from the extra performance offered by large computational resources from different providers. To address that, Bloqade is also available on the Amazon Web Services (AWS) Marketplace, and can run on AWS EC2 instances Amazon Machine Images (AMIs). More information about the AMIs and how to deploy them onto EC2 instances can be found below.
+Bloqade can be deployed on any personal computer although some users might benefit from the extra performance offered by large computational resources from different providers. To address that, Bloqade is also available on the Amazon Web Services (AWS) Marketplace, and can run on Amazon EC2 instances by deploying Amazon Machine Images (AMIs) onto them. More information about the AMIs and how to deploy them onto EC2 instances can be found below.
 
 ### Bloqade AMIs
 
@@ -81,15 +81,14 @@ as well as:
 
 Both of which are needed for Bloqade to take advantage of GPUs (see [GPU Acceleration](@ref cuda) for more on how to do this). 
 
-
 ### Disclaimers
 !!! info
-    - Deploying Bloqade on AWS EC2 instances will incur a cost on the user that will depend on the AWS resources utilized.  
+    - Deploying Bloqade on Amazon EC2 instances will incur a cost on the user that will depend on the AWS resources utilized.  
     - Support on deploying Bloqade on AWS can be obtained via AWS Support. This is a one-on-one support channel that is staffed 24x7x365 with experienced support engineers. To learn more, follow [this link](https://aws.amazon.com/premiumsupport/).
 
 ### Step 0: Set Your AWS Region
 
-For general guidelines on launching EC2 instances, check out the [AWS EC2 tutorial](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EC2_GetStarted.html).
+For general guidelines on launching EC2 instances, check out the [Amazon EC2 tutorial](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EC2_GetStarted.html).
 Bloqade can technically be run from any location but its images are hosted on servers in AWS' North Virginia (N. Virginia) region. To get started as easily as possible, set your AWS region location to N. Virginia (us-east-1).
 
 ![Step 0](assets/Bloqade_EC2/Step0.png)
@@ -114,9 +113,17 @@ Give your instance a memorable name...
 
 ### Step 4: Choose an Image
 
-...and choose Bloqade as an image. This will put the AMI on the instance which has Bloqade and all its dependencies ready to go. Take a look at the [Bloqade AMIs](#bloqade-amis) section of this page for more information on available images.
+...and choose Bloqade as an image. This will put the AMI on the instance which has Bloqade and all its dependencies ready to go.
 
-![Step 4](assets/Bloqade_EC2/Step4.png)
+To find the Bloqade image you can search for it by typing in "Bloqade" in the search bar: 
+
+![Step 4.1](assets/Bloqade_EC2/Step4.1.png)
+
+Upon hitting enter, ensure you're in the "AWS Marketplace AMIs" section and select which image you'd like to use:
+
+![Step 4.2](assets/Bloqade_EC2/Step4.2.png)
+
+Upon reviewing the information on the AMI and hitting "Continue" you'll be returned to the Instance page to continue customizing it.
 
 ### Step 5: Select Your Instance
 

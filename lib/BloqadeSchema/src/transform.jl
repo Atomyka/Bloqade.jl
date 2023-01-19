@@ -4,7 +4,7 @@
 # end with 0. This is useful when the user passes
 # in a duration that doesn't neatly fit into the
 # time resolution of the device. In which case 
-# this is reqiured to check the error.
+# this is required to check the error.
 function norm_diff_durations(A::Waveform,B::Waveform)
     A.duration==B.duration && return norm(A-B)
 
@@ -13,7 +13,7 @@ function norm_diff_durations(A::Waveform,B::Waveform)
         B = append(B,constant(;duration=T_diff,value=0))
         return norm(A-B)
     else
-        T_diff = B.duration - B.duration
+        T_diff = B.duration - A.duration
         A = append(A,constant(;duration=T_diff,value=0))
         return norm(A-B)
     end
@@ -267,14 +267,44 @@ function hardware_transform_parse(h::BloqadeExpr.RydbergHamiltonian,device_capab
 end
 
 # public API exposed here: 
+"""
+    hardware_transform_Ω(Ω,device_capabilities::DeviceCapabilities=get_device_capabilities())
 
+Given the `device_capabilities` of the machine and a Rabi frequency (Ω) [`Waveform`](@ref),
+return a transformed Ω capable of being implemented by the machine along with
+the error between the original (``A``) and transformed (``B``)
+waveforms calculated as ``\\Vert A - B\\Vert_1``. If the waveform durations are different,
+the shorter waveform is padded with zeros for values to make the durations equal in error calculation.
+
+# Logs/Warnings/Exceptions
+
+Exceptions are thrown if Ω is:
+- Not of type [`BloqadWaveforms.Waveform`](@ref)
+- Not a global drive (e.g.: Vector of Waveforms, localized Ω is not supported)
+- the maximum slope allowed for the waveform from `device_capabilities` is set to infinity 
+- the minimum time step allowed for the waveform from `device_capabilities` is set to zero
+
+
+Debug logs are issued if the following are encountered in Ω:
+- duration may be rounded due to time resolution from `device_capabilities`
+- the initial waveform does not start/end in zero for its value
+- the values in the waveform exceed `device_capabilities` supported values, and must be clipped 
+
+# Examples
+```jldoctest; setup:=(using BloqadeWaveforms)
+julia> wf = sinusoidal(duration=2, amplitude=1.3*π);
+
+julia> hardware_transform_Ω(wf)
+(Waveform(_, 2.0), 2.632451578170084)
+```
+"""
 function hardware_transform_Ω(Ω,device_capabilities::DeviceCapabilities=get_device_capabilities())
-    time_res = device_capabilities.rydberg.global_value.timeResolution
-    min_step = device_capabilities.rydberg.global_value.timeDeltaMin
-    rabi_res = device_capabilities.rydberg.global_value.rabiFrequencyResolution
-    max_slope = device_capabilities.rydberg.global_value.rabiFrequencySlewRateMax
-    max_value = device_capabilities.rydberg.global_value.rabiFrequencyMax
-    min_value = device_capabilities.rydberg.global_value.rabiFrequencyMin
+    time_res = device_capabilities.rydberg.global_value.time_resolution
+    min_step = device_capabilities.rydberg.global_value.time_delta_min
+    rabi_res = device_capabilities.rydberg.global_value.rabi_frequency_resolution
+    max_slope = device_capabilities.rydberg.global_value.rabi_frequency_slew_rate_max
+    max_value = device_capabilities.rydberg.global_value.rabi_frequency_max
+    min_value = device_capabilities.rydberg.global_value.rabi_frequency_min
 
     check_waveform(Ω,:Ω)
     check_global(Ω,:Ω)
@@ -302,13 +332,44 @@ function hardware_transform_Ω(Ω,device_capabilities::DeviceCapabilities=get_de
     return Ωt,norm_diff_durations(Ω,Ωt)
 end
 
+"""
+    hardware_transform_ϕ(ϕ,device_capabilities::DeviceCapabilities=get_device_capabilities())
+
+Given the `device_capabilities` of the machine and a phase [`Waveform`](@ref),
+return a transformed ϕ capable of being implemented by the machine along with
+the error between the original (``A``) and transformed (``B``)
+waveforms calculated as ``\\Vert A - B\\Vert_1``. If the waveform durations are different,
+the shorter waveform is padded with zeros for values to make the durations equal in error calculation.
+
+# Logs/Warnings/Exceptions
+
+Exceptions are thrown if ϕ is:
+- Not of type [`BloqadWaveforms.Waveform`](@ref)
+- Not a global drive (e.g.: Vector of Waveforms, localized ϕ is not supported)
+- the maximum slope allowed for the waveform from `device_capabilities` is set to infinity 
+- the minimum time step allowed for the waveform from `device_capabilities` is set to zero
+
+
+Debug logs are issued if the following are encountered in ϕ:
+- duration may be rounded due to time resolution from `device_capabilities`
+- the initial waveform does not start/end in zero for its value
+- the values in the waveform exceed `device_capabilities` supported values, and must be clipped 
+
+# Examples
+```jldoctest; setup:=(using BloqadeWaveforms)
+julia> wf = sinusoidal(duration=2, amplitude=1.3*π);
+
+julia> hardware_transform_ϕ(wf)
+(Waveform(_, 2.0), 0.5386117854062276)
+```
+"""
 function hardware_transform_ϕ(ϕ,device_capabilities::DeviceCapabilities=get_device_capabilities())
 
-    time_res = device_capabilities.rydberg.global_value.timeResolution
-    min_step = device_capabilities.rydberg.global_value.timeDeltaMin
-    phase_res = device_capabilities.rydberg.global_value.phaseResolution
-    max_value = device_capabilities.rydberg.global_value.phaseMax
-    min_value = device_capabilities.rydberg.global_value.phaseMin
+    time_res = device_capabilities.rydberg.global_value.time_resolution
+    min_step = device_capabilities.rydberg.global_value.time_delta_min
+    phase_res = device_capabilities.rydberg.global_value.phase_resolution
+    max_value = device_capabilities.rydberg.global_value.phase_max
+    min_value = device_capabilities.rydberg.global_value.phase_min
 
     # Can't feed in array of waveforms for ϕ
     check_global(ϕ,:ϕ)
@@ -340,17 +401,48 @@ function hardware_transform_ϕ(ϕ,device_capabilities::DeviceCapabilities=get_de
     return ϕt,norm_diff_durations(ϕ,ϕt)
 end
 
+"""
+    hardware_transform_Δ(Δ,device_capabilities::DeviceCapabilities=get_device_capabilities())
+
+Given the `device_capabilities` of the machine and a detuning waveform Δ,
+return a transformed Δ capable of being implemented by the machine along with
+the error between the original (``A``) and transformed (``B``)
+waveforms calculated as ``\\Vert A - B\\Vert_1``. If the waveform durations are different,
+the shorter waveform is padded with zeros for values to make the durations equal in error calculation.
+
+# Logs/Warnings/Exceptions
+
+Exceptions are thrown if Δ is:
+- Not of type [`BloqadWaveforms.Waveform`](@ref)
+- Not a global drive (e.g. Vector of Waveforms, localized Δ is not supported)
+- the maximum slope allowed for the waveform from `device_capabilities` is set to infinity 
+- the minimum time step allowed for the waveform from `device_capabilities` is set to zero
+
+
+Debug logs are issued if the following are encountered in Δ:
+- duration may be rounded due to time resolution from `device_capabilities`
+- the initial waveform does not start/end in zero for its value
+- the values in the waveform exceed `device_capabilities` supported values, and must be clipped 
+
+# Examples
+```jldoctest; setup:=(using BloqadeWaveforms)
+julia> wf = sinusoidal(duration=2, amplitude=1.3*π);
+
+julia> hardware_transform_Δ(wf)
+(Waveform(_, 2.0), 0.06492452289703464)
+```
+"""
 function hardware_transform_Δ(Δ,device_capabilities::DeviceCapabilities=get_device_capabilities())
 
-    time_res = device_capabilities.rydberg.global_value.timeResolution
-    min_step = device_capabilities.rydberg.global_value.timeDeltaMin
+    time_res = device_capabilities.rydberg.global_value.time_resolution
+    min_step = device_capabilities.rydberg.global_value.time_delta_min
     
-    detune_res = device_capabilities.rydberg.global_value.detuningResolution
-    local_res = device_capabilities.rydberg.local_value.localDetuningResolution
-    common_detune_res = device_capabilities.rydberg.local_value.commonDetuningResolution
-    max_slope = device_capabilities.rydberg.global_value.detuningSlewRateMax
-    max_value = device_capabilities.rydberg.global_value.detuningMax
-    min_value = device_capabilities.rydberg.global_value.detuningMin
+    detune_res = device_capabilities.rydberg.global_value.detuning_resolution
+    # local_res = device_capabilities.rydberg.local_value.local_detuning_resolution
+    # common_detune_res = device_capabilities.rydberg.local_value.common_detuning_resolution
+    max_slope = device_capabilities.rydberg.global_value.detuning_slew_rate_max
+    max_value = device_capabilities.rydberg.global_value.detuning_max
+    min_value = device_capabilities.rydberg.global_value.detuning_min
 
 
     check_waveform(Δ,:Δ)
@@ -414,9 +506,30 @@ function hardware_transform_Δ(Δ,device_capabilities::DeviceCapabilities=get_de
 
 end
 
+"""
+    hardware_transform_atoms(atoms,device_capabilities::DeviceCapabilities=get_device_capabilities())
+
+Given the constraints of the hardware from `device_capabilities` (specifically the position resolution)
+and an iterable containing the atom positions `atoms`, returns a Tuple containing the adjusted 
+atom positions the machine is capable of resolving and the mean squared error between the 
+desired atom positions and newly generated ones.
+
+Note that other constraints such as the maximum width, height, and minimum supported spacings
+are not taken into account in adjusting the atoms. This may result in the [`validation`](@ref) 
+function failing and requiring user intervention to modify the atom positions such that 
+they satisfy the other constraints.
+
+# Examples 
+```jldoctest;
+julia> atom_positions = ((1.12,), (2.01,), (3.01,));
+
+julia> hardware_transform_atoms(atom_positions) # by default, calls get_device_capabilities()
+([(1.1,), (2.0,), (3.0,)], 0.013333333333333197)
+```
+"""
 function hardware_transform_atoms(atoms,device_capabilities::DeviceCapabilities=get_device_capabilities())
 
-    pos_resolution = device_capabilities.lattice.geometry.positionResolution
+    pos_resolution = device_capabilities.lattice.geometry.position_resolution
 
     new_atoms = [set_resolution.(pos,pos_resolution) for pos in atoms]
 
@@ -426,6 +539,56 @@ function hardware_transform_atoms(atoms,device_capabilities::DeviceCapabilities=
 
 end
 
+"""
+    hardware_transform(h::BloqadeExpr.RydbergHamiltonian;device_capabilities::DeviceCapabilities=get_device_capabilities())
+
+Given the constraints of the hardware via `device_capabilities`, transforms `h` into one the
+machine is capable of executing as well as:
+* The mean squared error between original positions of the atoms and the transformed ones
+* The 1-norm of the difference between the original and transformed waveforms
+which are all stored in a [`HardwareTransformInfo`](@ref) struct.
+
+Note that not all atom position constraints are accounted for, such as the maximum lattice width, lattice height, 
+and minimum supported spacings. Only position resolution is automatically accounted for.
+This may result in the [`validation`](@ref) function failing and requiring user intervention to modify the atom 
+positions such that they satisfy the other constraints.
+
+# Logs/Warnings/Exceptions
+
+Debug logs are *always* emitted containing the error (defined as the 1-norm of the difference between
+the original waveform and the transformed waveform) across all waveforms (Ω, Δ, ϕ) as well as the 
+Mean Squared Error between the original atom positions and the adjusted atom positions.
+
+The debug logs/warnings from constituent functions [`hardware_transform_Ω`](@ref),
+[`hardware_transform_Δ`](@ref), [`hardware_transform_ϕ`](@ref) are also emitted should the 
+waveforms in `h` cause them to.
+
+See also [`hardware_transform_atoms`](@ref), [`hardware_transform_Ω`](@ref),
+[`hardware_transform_Δ`](@ref), [`hardware_transform_ϕ`](@ref).
+
+# Examples
+```jldoctest; setup:=(using BloqadeExpr, BloqadeLattices)
+julia> atom_positions = AtomList([(1.12,), (2.01,), (3.01,)]);
+
+julia> Δ = Ω = ϕ = sinusoidal(duration=2, amplitude=1.3*π);
+
+julia> h = rydberg_h(atom_positions; Ω=Ω,Δ=Δ,ϕ=ϕ)
+nqubits: 3
++
+├─ [+] ∑ 2π ⋅ 8.627e5.0/|x_i-x_j|^6 n_i n_j
+├─ [+] Ω(t) ⋅∑ e^{ϕ(t) ⋅ im} |0⟩⟨1| + e^{-ϕ(t) ⋅ im} |1⟩⟨0|
+└─ [-] Δ(t) ⋅ ∑ n_i
+
+
+julia> hardware_transform(h)
+(nqubits: 3
++
+├─ [+] ∑ 2π ⋅ 8.627e5.0/|x_i-x_j|^6 n_i n_j
+├─ [+] Ω(t) ⋅∑ e^{ϕ(t) ⋅ im} |0⟩⟨1| + e^{-ϕ(t) ⋅ im} |1⟩⟨0|
+└─ [-] Δ(t) ⋅ ∑ n_i
+, BloqadeSchema.HardwareTransformInfo(0.5386117854062276, 2.632451578170084, 0.06492452289703464, (Δ = Waveform(_, 2), δ = nothing, Δi = 1.0), 0.013333333333333197))
+```
+"""
 function hardware_transform(h::BloqadeExpr.RydbergHamiltonian;device_capabilities::DeviceCapabilities=get_device_capabilities())
     # gets transformed versions of waveforms, then creates new hamiltonian    
     atoms,ϕ,Ω,Δ,info = hardware_transform_parse(h,device_capabilities)

@@ -61,7 +61,7 @@ end
 XPhase operator for 2-level Rydberg system.
 
 ```math
-e^{ϕ ⋅ im} |0⟩⟨1| + e^{-ϕ ⋅ im} |1⟩⟨0|
+e^{ϕ ⋅ i} |0⟩⟨1| + e^{-ϕ ⋅ i} |1⟩⟨0|
 ```
 """
 struct XPhase{T} <: PrimitiveBlock{2}
@@ -74,7 +74,12 @@ end
 XPhase operator act on |0⟩ and |1⟩ for 3-level Rydberg system.
 
 ```math
-e^{ϕ ⋅ im} |0⟩⟨1| + e^{-ϕ ⋅ im} |1⟩⟨0|
+e^{ϕ ⋅ i} |0⟩⟨1| + e^{-ϕ ⋅ i} |1⟩⟨0| = 
+\\begin{pmatrix}
+0 & e^{ϕ ⋅ im} & 0 \\\\
+e^{-ϕ ⋅ im} & 0 & 0 \\\\
+0 & 0 & 0
+\\end{pmatrix}
 ```
 """
 struct XPhase_01{T} <: PrimitiveBlock{3}
@@ -87,7 +92,12 @@ end
 XPhase operator act on |1⟩ and |r⟩ for 3-level Rydberg system.
 
 ```math
-e^{ϕ ⋅ im} |1⟩⟨r| + e^{-ϕ ⋅ im} |r⟩⟨1|
+e^{ϕ ⋅ i} |1⟩⟨r| + e^{-ϕ ⋅ i} |r⟩⟨1| = 
+\\begin{pmatrix}
+0 & 0 & 0 \\\\
+0 & 0 & e^{ϕ ⋅ im} \\\\
+0 & e^{-ϕ ⋅ im} & 0
+\\end{pmatrix}
 ```
 """
 struct XPhase_1r{T} <: PrimitiveBlock{3}
@@ -124,6 +134,7 @@ struct OpPu_01 <: YaoBlocks.ConstantGate{1, 3} end
 struct OpPu_1r <: YaoBlocks.ConstantGate{1, 3} end
 struct OpPd_01 <: YaoBlocks.ConstantGate{1, 3} end
 struct OpPd_1r <: YaoBlocks.ConstantGate{1, 3} end
+
 const X_01 = OpX_01()
 const X_1r = OpX_1r()
 const Z_01 = OpZ_01()
@@ -135,6 +146,195 @@ const Pu_1r = OpPu_1r()
 const Pd_01 = OpPd_01()
 const Pd_1r = OpPd_1r()
 
+
+# ==================== Docstring for 3-level constant gates ====================
+
+"""
+    X_01
+    OpX_01 <: YaoBlocks.ConstantGate{1, 3}
+
+Pauli X operator act on |0⟩ and |1⟩ for 3-level Rydberg system.
+
+Matrix expression:
+
+```math
+\\sigma^{x,\\mathrm{hf}} = 
+\\begin{pmatrix}
+0 & 1 & 0 \\\\
+1 & 0 & 0 \\\\
+0 & 0 & 0
+\\end{pmatrix}
+```
+"""
+X_01, OpX_01
+
+"""
+    X_1r
+    OpX_1r <: YaoBlocks.ConstantGate{1, 3}
+
+Pauli X operator act on |1⟩ and |r⟩ for 3-level Rydberg system.
+
+Matrix expression:
+
+```math
+\\sigma^{x,\\mathrm{r}} = 
+\\begin{pmatrix}
+0 & 0 & 0 \\\\
+0 & 0 & 1 \\\\
+0 & 1 & 0
+\\end{pmatrix}
+```
+"""
+X_1r, OpX_1r
+
+"""
+    Z_01
+    OpZ_01 <: YaoBlocks.ConstantGate{1, 3}
+
+Pauli Z operator act on |0⟩ and |1⟩ for 3-level Rydberg system.
+
+Matrix expression:
+
+```math
+\\sigma^{z,\\mathrm{hf}} = 
+\\begin{pmatrix}
+1 & 0 & 0 \\\\
+0 & -1 & 0 \\\\
+0 & 0 & 0
+\\end{pmatrix}
+```
+"""
+Z_01, OpZ_01
+
+"""
+    Z_1r
+    OpZ_1r <: YaoBlocks.ConstantGate{1, 3}
+
+Pauli Z operator act on |1⟩ and |r⟩ for 3-level Rydberg system.
+
+Matrix expression:
+
+```math
+\\sigma^{z,\\mathrm{r}} = 
+\\begin{pmatrix}
+0 & 0 & 0 \\\\
+0 & 1 & 0 \\\\
+0 & 0 & -1
+\\end{pmatrix}
+```
+"""
+Z_1r, OpZ_1r
+
+"""
+    N_1
+    OpN_1 <: YaoBlocks.ConstantGate{1, 3}
+
+Projection operator onto |1⟩ for 3-level Rydberg system.
+
+Matrix expression:
+
+```math
+n^1 = |1⟩⟨1| = 
+\\begin{pmatrix}
+0 & 0 & 0 \\\\
+0 & 1 & 0 \\\\
+0 & 0 & 0
+\\end{pmatrix}
+```
+"""
+N_1, OpN_1
+
+"""
+    N_r
+    OpN_r <: YaoBlocks.ConstantGate{1, 3}
+
+Projection operator onto |r⟩ for 3-level Rydberg system.
+
+Matrix expression:
+    
+```math
+n^{\\mathrm{r}} = |r⟩⟨r| = 
+\\begin{pmatrix}
+0 & 0 & 0 \\\\
+0 & 0 & 0 \\\\
+0 & 0 & 1
+\\end{pmatrix}
+```
+"""
+N_r, OpN_r
+
+"""
+    Pu_01
+    OpPu_01 <: YaoBlocks.ConstantGate{1, 3}
+
+Matrix expression:
+
+```math
+\\mathrm{Pu}^{\\mathrm{hf}} = 
+\\begin{pmatrix}
+0 & 1 & 0 \\\\
+0 & 0 & 0 \\\\
+0 & 0 & 0
+\\end{pmatrix}
+```
+"""
+Pu_01, OpPu_01
+
+
+"""
+    Pu_1r
+    OpPu_1r <: YaoBlocks.ConstantGate{1, 3}
+
+Matrix expression:
+
+```math
+\\mathrm{Pu}^{\\mathrm{r}} = 
+\\begin{pmatrix}
+0 & 0 & 0 \\\\
+0 & 0 & 1 \\\\
+0 & 0 & 0
+\\end{pmatrix}
+```
+"""
+Pu_1r, OpPu_1r
+
+"""
+    Pd_01
+    OpPd_01 <: YaoBlocks.ConstantGate{1, 3}
+
+Matrix expression:
+
+```math
+\\mathrm{Pd}^{\\mathrm{hf}} = 
+\\begin{pmatrix}
+0 & 0 & 0 \\\\
+1 & 0 & 0 \\\\
+0 & 0 & 0
+\\end{pmatrix}
+```
+"""
+Pd_01, OpPd_01
+
+"""
+    Pd_1r
+    OpPd_1r <: YaoBlocks.ConstantGate{1, 3}
+
+Matrix expression:
+
+```math
+\\mathrm{Pd}^{\\mathrm{r}} = 
+\\begin{pmatrix}
+0 & 0 & 0 \\\\
+0 & 0 & 0 \\\\
+0 & 1 & 0
+\\end{pmatrix}
+```
+"""
+Pd_1r, OpPd_1r
+
+# ==================== Docstring for 3-level constant gates (end) ====================
+
+
 """
     AbstractTerm{D} <: PrimitiveBlock{D}
 
@@ -142,7 +342,7 @@ Abstract term for local hamiltonian terms on D-level system.
 """
 abstract type AbstractTerm{D} <: PrimitiveBlock{D} end
 
-YaoBlocks.unsafe_getindex(::Type{T}, x::AbstractTerm, i::Integer, j::Integer) where {T,N} = YaoBlocks.unsafe_getindex(T, YaoBlocks.Optimise.to_basictypes(x), i, j)
+YaoBlocks.unsafe_getindex(::Type{T}, x::AbstractTerm, i::Integer, j::Integer) where T = YaoBlocks.unsafe_getindex(T, YaoBlocks.Optimise.to_basictypes(x), i, j)
 YaoBlocks.unsafe_getcol(::Type{T}, x::AbstractTerm, j::DitStr{2}) where T = YaoBlocks.unsafe_getcol(T, YaoBlocks.Optimise.to_basictypes(x), j)
 YaoBlocks.ishermitian(::AbstractTerm) = true
 
@@ -155,7 +355,7 @@ Type for Rydberg interactive term.
 # Expression
 
 ```math
-\\sum_{i, j} \\frac{C}{|r_i - r_j|^6} n_i n_j
+\\sum_{i, j} \\frac{C}{|x_i - x_j|^6} n_i n_j
 ```
 
 # Keyword Arguments
@@ -164,7 +364,7 @@ Type for Rydberg interactive term.
 - `C`: the interaction strength, default unit is `MHz⋅μm^6`. default value is `2π * 862690 * MHz*µm^6`.
 """
 Base.@kwdef struct RydInteract{D} <: AbstractTerm{D}
-    atoms::Vector
+    atoms::Union{Vector,BoundedLattice}
     C::Real = 2π * 862690
 
     function RydInteract{D}(atoms, C) where D
@@ -213,6 +413,18 @@ Base.@kwdef struct SumOfX <: AbstractTerm{2}
 end
 SumOfX(n::Int) = SumOfX(n, 1)
 
+"""
+    struct SumOfX_01 <: AbstractTerm{3}
+    SumOfX_01(nsites, Ω)
+
+Term for sum of `X_01` operators.
+
+# Expression
+
+```math
+\\sum_i Ω σ^{x,\\mathrm{hf}}_i
+```
+"""
 Base.@kwdef struct SumOfX_01 <: AbstractTerm{3}
     nsites::Int
     Ω = 1
@@ -225,6 +437,18 @@ Base.@kwdef struct SumOfX_01 <: AbstractTerm{3}
 end
 SumOfX_01(n::Int) = SumOfX_01(n, 1)
 
+"""
+    struct SumOfX_1r <: AbstractTerm{3}
+    SumOfX_1r(nsites, Ω)
+
+Term for sum of `X_1r` operators.
+
+# Expression
+
+```math
+\\sum_i Ω σ^{x,\\mathrm{r}}_i
+```
+"""
 Base.@kwdef struct SumOfX_1r <: AbstractTerm{3}
     nsites::Int
     Ω = 1
@@ -265,7 +489,7 @@ But may provide extra speed up.
 # Expression
 
 ```math
-\\sum_i Ω ⋅ (e^{ϕ ⋅ im} |0⟩⟨1| + e^{-ϕ ⋅ im} |1⟩⟨0|)
+\\sum_i Ω ⋅ (e^{ϕ ⋅ i} |0⟩⟨1| + e^{-ϕ ⋅ i} |1⟩⟨0|)
 ```
 """
 Base.@kwdef struct SumOfXPhase <: AbstractTerm{2}
@@ -283,6 +507,18 @@ Base.@kwdef struct SumOfXPhase <: AbstractTerm{2}
     end
 end
 
+"""
+    struct SumOfXPhase_01 <: AbstractTerm{3}
+    SumOfXPhase_01(nsites, Ω, ϕ)
+
+Term for sum of `XPhase_01` operators.
+
+# Expression
+
+```math
+\\sum_i Ω ⋅ (e^{ϕ ⋅ i} |0⟩⟨1| + e^{-ϕ ⋅ i} |1⟩⟨0|)
+```
+"""
 Base.@kwdef struct SumOfXPhase_01 <: AbstractTerm{3}
     nsites::Int
     Ω = 1
@@ -297,6 +533,19 @@ Base.@kwdef struct SumOfXPhase_01 <: AbstractTerm{3}
         return new(nsites, Ω, ϕ)
     end
 end
+
+"""
+    struct SumOfXPhase_1r <: AbstractTerm{3}
+    SumOfXPhase_1r(nsites, Ω, ϕ)
+
+Term for sum of `XPhase_1r` operators.
+
+# Expression
+
+```math
+\\sum_i Ω ⋅ (e^{ϕ ⋅ i} |1⟩⟨r| + e^{-ϕ ⋅ i} |r⟩⟨1|)
+```
+"""
 Base.@kwdef struct SumOfXPhase_1r <: AbstractTerm{3}
     nsites::Int
     Ω = 1
@@ -354,6 +603,18 @@ Base.@kwdef struct SumOfN <: AbstractTerm{2}
 end
 SumOfN(n::Int) = SumOfN(n, 1)
 
+"""
+    struct SumOfN_r <: AbstractTerm{3}
+    SumOfN_1(;nsites[, Δ=1])
+
+Sum of N_r operators. 
+
+# Expression
+
+```math
+\\sum_i Δ ⋅ n^r_i
+```
+"""
 Base.@kwdef struct SumOfN_r <: AbstractTerm{3}
     nsites::Int
     Δ = 1
@@ -365,6 +626,18 @@ Base.@kwdef struct SumOfN_r <: AbstractTerm{3}
 end
 SumOfN_r(n::Int) = SumOfN_r(n, 1)
 
+"""
+    struct SumOfN_1 <: AbstractTerm{3}
+    SumOfN_1(;nsites[, Δ=1])
+
+Sum of N_1 operators. 
+
+# Expression
+
+```math
+\\sum_i Δ ⋅ n^r_i
+```
+"""
 Base.@kwdef struct SumOfN_1 <: AbstractTerm{3}
     nsites::Int
     Δ = 1
@@ -415,6 +688,18 @@ Base.@kwdef struct SumOfZ <: AbstractTerm{2}
 end
 SumOfZ(n::Int) = SumOfZ(n, 1)
 
+"""
+    struct SumOfZ_01 <: AbstractTerm{2}
+    SumOfZ_01(;nsites, Δ=1)
+
+Sum of Pauli Z_01 operators.
+
+# Expression
+
+```math
+\\sum_i Δ ⋅ σ^{z,\\mathrm{hf}}_i
+```
+"""
 Base.@kwdef struct SumOfZ_01 <: AbstractTerm{3}
     nsites::Int
     Δ = 1
@@ -426,6 +711,18 @@ Base.@kwdef struct SumOfZ_01 <: AbstractTerm{3}
 end
 SumOfZ_01(n::Int) = SumOfZ_01(n, 1)
 
+"""
+    struct SumOfZ_1r <: AbstractTerm{2}
+    SumOfZ_1r(;nsites, Δ=1)
+
+Sum of Pauli Z_1r operators.
+
+# Expression
+
+```math
+\\sum_i Δ ⋅ σ^{z,\\mathrm{r}}_i
+```
+"""
 Base.@kwdef struct SumOfZ_1r <: AbstractTerm{3}
     nsites::Int
     Δ = 1
@@ -469,7 +766,7 @@ struct RydbergHamiltonian <: AbstractTerm{2}
     detuning_term::DetuningTypes
 end
 
-struct RydbergHamiltonian_3 <: AbstractTerm{3}
+struct RydbergHamiltonian3 <: AbstractTerm{3}
     rydberg_term::RydInteract{3}
     rabi_term_hf::HyperfineRabiTypes
     detuning_term_hf::HyperfineDetuningTypes
@@ -491,7 +788,7 @@ function add_terms(h::RydbergHamiltonian)
     return YaoBlocks.Optimise.simplify(terms)
 end
 
-function add_terms(h::RydbergHamiltonian_3)
+function add_terms(h::RydbergHamiltonian3)
     terms = h.rydberg_term
 
     if typeof(h.rabi_term_hf) <: Union{SumOfX_01,SumOfXPhase_01}
@@ -510,7 +807,7 @@ function add_terms(h::RydbergHamiltonian_3)
     return YaoBlocks.Optimise.simplify(terms)
 end
 
-function YaoBlocks.unsafe_getindex(::Type{T}, h::RydbergHamiltonian, i::Integer, j::Integer) where {T,N}
+function YaoBlocks.unsafe_getindex(::Type{T}, h::RydbergHamiltonian, i::Integer, j::Integer) where T
     return YaoBlocks.unsafe_getindex(T, YaoBlocks.Optimise.to_basictypes(h), i, j)
 end
 
@@ -532,8 +829,8 @@ YaoAPI.nqudits(h::RydInteract) = length(h.atoms)
 YaoAPI.nqudits(h::SumOfXTypes) = h.nsites
 YaoAPI.nqudits(h::SumOfXPhaseTypes) = h.nsites
 YaoAPI.nqudits(h::SumOfZAndNTypes) = h.nsites
-YaoAPI.nqubits(::ThreeLevelRydbergConstGates) = 1
-@inline YaoAPI.nqudits(h::RydbergHamiltonian) = nqudits(h.rydberg_term)
+YaoAPI.nqudits(::ThreeLevelRydbergConstGates) = 1
+@inline YaoAPI.nqudits(h::Union{RydbergHamiltonian, RydbergHamiltonian3}) = nqudits(h.rydberg_term)
 
 # checks of objects have the same base object f.
 function Base.:(==)(lhs::DivByTwo{F1},rhs::DivByTwo{F2}) where {F1,F2} 
@@ -560,7 +857,7 @@ function Base.:(==)(lhs::RydbergHamiltonian, rhs::RydbergHamiltonian)
     return lhs.rydberg_term == rhs.rydberg_term && lhs.rabi_term == rhs.rabi_term && lhs.detuning_term == rhs.detuning_term
 end
 
-function Base.:(==)(lhs::RydbergHamiltonian_3, rhs::RydbergHamiltonian_3)
+function Base.:(==)(lhs::RydbergHamiltonian3, rhs::RydbergHamiltonian3)
     return lhs.rydberg_term == rhs.rydberg_term && 
         lhs.rabi_term_hf == rhs.rabi_term_hf && lhs.detuning_term_hf == rhs.detuning_term_hf &&
         lhs.rabi_term_r == rhs.rabi_term_r && lhs.detuning_term_r == rhs.detuning_term_r
@@ -573,7 +870,7 @@ Base.isreal(::SumOfXPhaseTypes) = false
 Base.isreal(h::Add) = all(isreal, subblocks(h))
 Base.isreal(h::Scale) = isreal(factor(h)) && isreal(content(h))
 Base.isreal(h::RydbergHamiltonian) = !(h.rabi_term isa SumOfXPhase)
-Base.isreal(h::RydbergHamiltonian_3) = !(h.rabi_term_hf isa SumOfXPhase_01) && !(h.rabi_term_r isa SumOfXPhase_1r)
+Base.isreal(h::RydbergHamiltonian3) = !(h.rabi_term_hf isa SumOfXPhase_01) && !(h.rabi_term_r isa SumOfXPhase_1r)
 
 
 storage_size(x) = sizeof(x)
@@ -583,3 +880,18 @@ end
 function storage_size(H::SparseMatrixCSC)
     return sizeof(H.colptr) + sizeof(H.rowval) + sizeof(H.nzval)
 end
+
+is_time_dependent(::Nothing) = false
+function is_time_dependent(t::Union{RabiTypes, HyperfineRabiTypes, RydbergRabiTypes})
+    (t isa Union{SumOfX, SumOfX_01, SumOfX_1r}) && return !is_const_param(t.Ω)
+    (t isa Union{SumOfXPhase, SumOfXPhase_01, SumOfXPhase_1r}) && (return !is_const_param(t.Ω) || !is_const_param(t.ϕ))
+    return false
+end
+function is_time_dependent(t::Union{DetuningTypes, HyperfineDetuningTypes, RydbergDetuningTypes})
+    (t isa Union{SumOfN, SumOfN_1, SumOfN_r}) && return !is_const_param(t.Δ)
+    return false
+end
+is_time_dependent(h::RydbergHamiltonian) = is_time_dependent(h.rabi_term) || is_time_dependent(h.detuning_term)
+is_time_dependent(h::RydbergHamiltonian3) = 
+    is_time_dependent(h.rabi_term_hf) || is_time_dependent(h.detuning_term_hf) ||
+    is_time_dependent(h.rabi_term_r) || is_time_dependent(h.detuning_term_r)

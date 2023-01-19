@@ -63,7 +63,7 @@ lattice_vectors(chain)
 lattice_sites(chain)
 ```
 
-Once we have defined certain lattice shapes (which have fixed lattice vectors and site positions in the unit cell), we can generate the atom positons by 
+Once we have defined certain lattice shapes (which have fixed lattice vectors and site positions in the unit cell), we can generate the atom positions by 
 specifying the number of atoms and the scale size of the lattice. 
 This is done by using the function [`generate_sites`](@ref) , which will return a [`AtomList`](@ref) instance containing the coordinates of each atom, e.g.:  
 
@@ -186,11 +186,53 @@ One can select and display these atoms with the correct labeling by typing:
 Bloqade.plot(sorted_atoms[neighbors[2]]; texts=string.(neighbors[2]))
 ```
 
-It shows the correct second nearest neigbors of the site 5.
+It shows the correct second nearest neighbors of the site 5.
 One can check the docstring of [`Bloqade.plot`](@ref) to know more about how to customize lattice visualization.
 
 ## References
 
-```@autodocs
-Modules = [BloqadeLattices]
+```@docs
+AbstractLattice
+GeneralLattice
+SquareLattice
+RectangularLattice
+HoneycombLattice
+TriangularLattice
+ChainLattice
+LiebLattice
+KagomeLattice
+
+lattice_vectors
+lattice_sites
+BloqadeLattices.dimension
+generate_sites
+offset_axes
+random_dropout
+rescale_axes
+clip_axes
+
+MaskedGrid
+AtomList
+make_grid
+collect_atoms
+
+img_atoms
+img_maskedgrid
+ByDensity
+
+AbstractRegion
+Parallelepiped
+Parallelepiped(vecs)
+Parallelepiped(vecs::T) where {T<:Real}
+
+distance
+generate_sites_in_region
+
+BoundedLattice
+parallelepiped_region
+
+two_body_interaction_matrix
+rydberg_interaction_matrix
+
 ```
+

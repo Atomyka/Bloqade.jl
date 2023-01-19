@@ -61,13 +61,14 @@ to solve the dynamics.
 For more ODE options, please refer to [Common Solver Options](https://diffeq.sciml.ai/stable/basics/common_solver_opts/).
 The `SchrodingerProblem` type supports most of the standard DiffEq problem interface.
 """
-struct SchrodingerProblem{Reg,EquationType<:ODEFunction,uType,tType,Kwargs} <:
+struct SchrodingerProblem{Reg,EquationType<:ODEFunction,uType,tType,Algo,Kwargs} <:
        SciMLBase.AbstractODEProblem{uType,tType,true}
     reg::Reg
     f::EquationType
     state::uType # alias of reg.state
     u0::uType # a copy of input state
     tspan::tType
+    algo::Algo
 
     # constant solver parameters
     kwargs::Kwargs
@@ -75,8 +76,8 @@ struct SchrodingerProblem{Reg,EquationType<:ODEFunction,uType,tType,Kwargs} <:
     p::Nothing # well make DiffEq happy
 end
 
-function SchrodingerProblem(reg::AbstractRegister, tspan, expr; kw...)
-    nqubits(reg) == nqubits(expr) || throw(ArgumentError("number of qubits/sites does not match!"))
+function SchrodingerProblem(reg::AbstractRegister, tspan, expr; algo=AutoVern9(Rodas5(autodiff=false)), kw...)
+    nqudits(reg) == nqudits(expr) || throw(ArgumentError("number of qubits/sites does not match!"))
     # remove this after ArrayReg start using AbstractVector
     state = statevec(reg)
     space = YaoSubspaceArrayReg.space(reg)
@@ -88,15 +89,26 @@ function SchrodingerProblem(reg::AbstractRegister, tspan, expr; kw...)
     eq = SchrodingerEquation(expr, Hamiltonian(T, expr, space))
     ode_f = ODEFunction(eq)
 
-    default_ode_options = (save_everystep = false, save_start = false, save_on = false, dense = false)
+    tspan_type = promote_type(real(eltype(state)), eltype(tspan))
+    tspan = tspan_type.(tspan) # promote tspan to T so Dual number works
+
+    default_ode_options = (
+        save_everystep = false,
+        save_start = false,
+        save_on = false,
+        dense = false,
+        reltol=1e-8,
+        abstol=1e-8,
+    )
     kw = pairs(merge(default_ode_options, kw))
 
-    return SchrodingerProblem{typeof(reg),typeof(ode_f),typeof(state),typeof(tspan),typeof(kw)}(
+    return SchrodingerProblem{typeof(reg),typeof(ode_f),typeof(state),typeof(tspan),typeof(algo), typeof(kw)}(
         reg,
         ode_f,
         state,
         copy(state),
         tspan,
+        algo,
         kw,
         nothing,
     )
@@ -107,7 +119,7 @@ function Adapt.adapt_structure(to, x::SchrodingerProblem)
     state = statevec(d_reg)
     return SchrodingerProblem(
         d_reg, adapt(to, x.f), state,
-        copy(state), x.tspan, x.kwargs, x.p
+        copy(state), x.tspan, x.algo, x.kwargs, x.p
     )
 end
 
@@ -135,10 +147,11 @@ function Base.show(io::IO, mime::MIME"text/plain", prob::SchrodingerProblem)
     # equation info
     println(io, tab(indent + 2), "equation: ")
     show(IOContext(io, :indent => indent + 4), mime, prob.f.f)
+    println(io, tab(indent + 4), "algorithm: ", repr(prob.algo))
 
     # options
     isempty(prob.kwargs) || println(io, tab(indent + 2), "options:")
-    order = [:algo, :dt, :adaptive, :progress]
+    order = [:dt, :adaptive, :progress]
     for key in order
         if haskey(prob.kwargs, key)
             println(io, tab(indent + 4), key, ": ", repr(prob.kwargs[key]))
@@ -170,6 +183,6 @@ end
 DiffEqBase.get_concrete_problem(prob::SchrodingerProblem, isadapt; kw...) = prob
 
 function BloqadeExpr.emulate!(prob::SchrodingerProblem)
-    solve(prob, get(prob.kwargs, :algo, Vern8()))
+    solve(prob, prob.algo)
     return prob
 end

@@ -1,6 +1,11 @@
 using Test, BloqadeQMC
 using Statistics
 
+if "docstring" in ARGS
+    # include("docstrings.jl")
+    exit()
+end
+
 @testset "Probability Vectors" begin
     @testset "Small Vector of size $n" for n in 1:10
         p = float.(rand(1:10, n))
@@ -24,6 +29,8 @@ H = @inferred LTFIM((10,), 1.0, 1.0, 1.0)
 
 THRESHOLD = 2.576  # 99% Two-sided CI of the t-distribution with infinite dofs
 
+include("rydberg.jl")
+include("interface.jl")
 
 # include("ltfim.jl")
 # include("tfim.jl")

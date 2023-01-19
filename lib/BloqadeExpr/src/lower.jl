@@ -147,7 +147,7 @@ function emit_dynamic_terms(ex::SumOfXPhaseTypes)
 end
 
 emit_dynamic_terms(h::RydbergHamiltonian) = emit_dynamic_terms(add_terms(h))
-emit_dynamic_terms(h::RydbergHamiltonian_3) = emit_dynamic_terms(add_terms(h))
+emit_dynamic_terms(h::RydbergHamiltonian3) = emit_dynamic_terms(add_terms(h))
 
 """
     Hamiltonian(::Type{Tv}, expr[, space=fullspace])
@@ -220,12 +220,11 @@ end
 
 function YaoBlocks.Optimise.to_basictypes(ex::RydInteract{D}) where D
     nsites = length(ex.atoms)
-
+    V = rydberg_interaction_matrix(ex.atoms,ex.C)
     term = nothing
     op = (D == 2 ? ConstGate.P1 : N_r)
-    for i in 1:nsites, j in 1:i-1
-        x, y = ex.atoms[i], ex.atoms[j]
-        h = ex.C / distance(x, y)^6 * kron(nsites, i => op, j => op)
+    for i in 1:nsites, j in i+1:nsites
+        h = V[i,j]*kron(nsites, i => op, j => op)
 
         if isnothing(term)
             term = h
@@ -240,7 +239,7 @@ end
 function YaoBlocks.Optimise.to_basictypes(h::RydbergHamiltonian)
     return YaoBlocks.Optimise.simplify(add_terms(h); rules=[YaoBlocks.Optimise.to_basictypes])
 end
-function YaoBlocks.Optimise.to_basictypes(h::RydbergHamiltonian_3)
+function YaoBlocks.Optimise.to_basictypes(h::RydbergHamiltonian3)
     return YaoBlocks.Optimise.simplify(add_terms(h); rules=[YaoBlocks.Optimise.to_basictypes])
 end
 
